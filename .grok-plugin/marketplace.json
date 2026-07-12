@@ -1,0 +1,113 @@
+{
+  "name": "grok-workflows",
+  "owner": {
+    "name": "Shinsuke Kagawa",
+    "url": "https://github.com/shinpr"
+  },
+  "metadata": {
+    "description": "Grok marketplace for claude-code-workflows (CCW): claude-to-grok runtime translation plus external dev-workflows* plugins. Grok users install from this marketplace only; workflow source remains upstream CCW."
+  },
+  "plugins": [
+    {
+      "name": "claude-to-grok",
+      "source": "./plugins/claude-to-grok",
+      "strict": true,
+      "version": "0.1.0",
+      "description": "Maps Claude Code tool, agent, and progress-tracking identifiers to Grok equivalents for dev-workflows / recipe orchestration, preserving CCW flows and stop points.",
+      "author": {
+        "name": "Shinsuke Kagawa",
+        "url": "https://github.com/shinpr"
+      },
+      "homepage": "https://github.com/shinpr/grok-workflows",
+      "repository": "https://github.com/shinpr/grok-workflows.git",
+      "license": "MIT",
+      "category": "development",
+      "keywords": [
+        "grok",
+        "claude-code",
+        "ccw",
+        "dev-workflows",
+        "adapter",
+        "compatibility"
+      ],
+      "skills": [
+        "./skills/claude-to-grok"
+      ]
+    },
+    {
+      "name": "dev-workflows",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/shinpr/claude-code-workflows.git",
+        "path": "dev-workflows",
+        "ref": "v0.22.4"
+      },
+      "version": "0.22.4",
+      "description": "Upstream CCW backend workflows (external). Skills + subagents for orchestrated agentic coding. Install from the grok-workflows marketplace together with claude-to-grok.",
+      "author": {
+        "name": "Shinsuke Kagawa",
+        "url": "https://github.com/shinpr"
+      },
+      "homepage": "https://github.com/shinpr/claude-code-workflows",
+      "repository": "https://github.com/shinpr/claude-code-workflows.git",
+      "license": "MIT",
+      "category": "development",
+      "keywords": [
+        "workflows",
+        "ccw",
+        "dev-workflows",
+        "backend"
+      ]
+    },
+    {
+      "name": "dev-workflows-frontend",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/shinpr/claude-code-workflows.git",
+        "path": "dev-workflows-frontend",
+        "ref": "v0.22.4"
+      },
+      "version": "0.22.4",
+      "description": "Upstream CCW frontend workflows (external). React/TypeScript skills + subagents. Install from the grok-workflows marketplace together with claude-to-grok.",
+      "author": {
+        "name": "Shinsuke Kagawa",
+        "url": "https://github.com/shinpr"
+      },
+      "homepage": "https://github.com/shinpr/claude-code-workflows",
+      "repository": "https://github.com/shinpr/claude-code-workflows.git",
+      "license": "MIT",
+      "category": "development",
+      "keywords": [
+        "workflows",
+        "ccw",
+        "frontend",
+        "react"
+      ]
+    },
+    {
+      "name": "dev-workflows-fullstack",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/shinpr/claude-code-workflows.git",
+        "path": "dev-workflows-fullstack",
+        "ref": "v0.22.4"
+      },
+      "version": "0.22.4",
+      "description": "Upstream CCW fullstack workflows (external). Backend + React/TypeScript orchestration. Install from the grok-workflows marketplace together with claude-to-grok.",
+      "author": {
+        "name": "Shinsuke Kagawa",
+        "url": "https://github.com/shinpr"
+      },
+      "homepage": "https://github.com/shinpr/claude-code-workflows",
+      "repository": "https://github.com/shinpr/claude-code-workflows.git",
+      "license": "MIT",
+      "category": "development",
+      "keywords": [
+        "workflows",
+        "ccw",
+        "fullstack",
+        "dev-workflows-fullstack"
+      ]
+    }
+  ]
+}

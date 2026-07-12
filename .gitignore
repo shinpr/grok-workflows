@@ -1,0 +1,10 @@
+.DS_Store
+node_modules/
+tmp/
+*.log
+.idea/
+.vscode/
+
+# Local harness / IDE project state (not packaged plugins)
+.claude/
+.grok/
