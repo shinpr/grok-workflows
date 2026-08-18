@@ -1,10 +1,10 @@
 ---
 name: claude-to-grok
 description: >
-  Maps Claude Code tool, agent, and progress-tracking identifiers to Grok
-  runtime equivalents while preserving claude-code-workflows (dev-workflows*)
-  execution semantics. Use when running dev-workflows* on Grok, including
-  recipe-* orchestration that needs CC→Grok translation.
+  Maps Claude Code tool and agent identifiers to Grok runtime equivalents
+  while preserving claude-code-workflows (dev-workflows*) execution semantics.
+  Use when running dev-workflows* on Grok, including recipe-* orchestration
+  that needs CC→Grok translation.
 ---
 
 # Claude → Grok (CCW runtime map)
@@ -14,8 +14,7 @@ description: >
 1. **Preserve CCW execution** — keep every CCW step, `[Stop]` gate, handoff contract, review loop, commit cycle, and quality gate mandatory.
 2. **Translate identifiers** — replace Claude Code tool/agent names with the Grok tools in the maps; keep prompt *what*, deliverable paths, and acceptance criteria unchanged.
 3. **Use the required specialist** — spawn exclusively the plugin-qualified CCW agent type named by the recipe (`dev-workflows-fullstack:<name>` or the backend/frontend prefix).
-4. **Register progress** — fulfill CCW `TaskCreate`/`TaskUpdate` duties with `todo_write` (session todos; duty-level equivalent only — see Progress tracking).
-5. **Handle runtime failures** — when a mapped tool or agent cannot complete, follow the Runtime failure procedure. Map only documented equivalents.
+4. **Handle runtime failures** — when a mapped tool or agent cannot complete, follow the Runtime failure procedure. Map only documented equivalents.
 
 Recipe invocation remains exclusively user-slash initiated (`disable-model-invocation` on `recipe-*`). This skill activates for translation during orchestration.
 
@@ -32,7 +31,6 @@ Recipe invocation remains exclusively user-slash initiated (`disable-model-invoc
 | `Glob` / `LS` / `ListDir` | `list_dir` + `grep` / `run_terminal_command` as needed | Discover paths via `list_dir` or shell only when list_dir is insufficient |
 | `WebSearch` | `web_search` | |
 | `AskUserQuestion` | `ask_user_question` | All `[Stop]` confirmations |
-| `TaskCreate` / `TaskUpdate` | `todo_write` | Duty equivalent — see Progress tracking |
 | `SendMessage` (resume) | `spawn_subagent` + `resume_from` | Prefer fresh `spawn_subagent` per CCW isolation; `resume_from` only when CCW continues the same session |
 
 Orchestrator write tools: use mapped Edit/Write tools **only inside specialists** that CCW allows to edit.
@@ -88,24 +86,6 @@ WHEN the installed plugin is backend-only or frontend-only, use:
 
 Use the plugin-qualified subagent type. WHEN it is unavailable, inspect the registered subagent types and follow the Runtime failure procedure. Use a bare name only when inspection shows that exact bare name is registered.
 
-## Progress tracking (`TaskCreate` / `TaskUpdate` → `todo_write`)
-
-Fulfill the same registration duty with `todo_write`:
-
-| CCW intent | Grok action |
-|------------|-------------|
-| Register all flow steps after scale determination | `todo_write` (`merge: false` or first write) listing every step; include “Map preloaded skills to concrete rules” when the agent requires it |
-| Mark current step in progress | `todo_write` `merge: true`, `status: in_progress` |
-| Complete a step | `merge: true`, `status: completed` |
-| Specialist internal TaskCreate first/last tasks | Same via `todo_write` inside that subagent when it has the tool |
-
-**Duty limits**
-
-- `todo_write` is session todo state, not Claude’s Task board API.
-- Use stable string IDs (e.g. `flow-req-analyzer`, `flow-prd`).
-- MCP scheduled tasks represent scheduled jobs; use `todo_write` for CCW progress registration.
-- IF progress registration is required and `todo_write` is unavailable → Runtime failure procedure.
-
 ## Subagent prompt construction
 
 Keep CCW prompt rules. Always include:
@@ -118,7 +98,7 @@ Keep CCW prompt rules. Always include:
 ```text
 Runtime (Grok): Agent/Task→spawn_subagent then get_command_or_subagent_output;
 Bash→run_terminal_command; Read→read_file; Edit/MultiEdit→search_replace; Write→write;
-AskUserQuestion→ask_user_question; TaskCreate/TaskUpdate→todo_write (duty).
+AskUserQuestion→ask_user_question.
 subagent_type prefix: dev-workflows-fullstack: (or dev-workflows: / dev-workflows-frontend:).
 Preserve every CCW step and gate.
 ```
@@ -129,7 +109,6 @@ Preserve every CCW step and gate.
 |---------------|------|
 | Agent | `spawn_subagent` + wait via `get_command_or_subagent_output` |
 | AskUserQuestion | `ask_user_question` |
-| TaskCreate / TaskUpdate | `todo_write` |
 | Bash | `run_terminal_command` |
 | Read | `read_file` |
 
@@ -160,4 +139,4 @@ WHEN a mapped operation cannot complete (including: no map row, agent not regist
 
 ## Scope
 
-This skill covers runtime identifier translation, progress-duty translation, subagent waiting, and runtime-failure reporting. CCW defines recipe bodies, workflow gates, and quality policy.
+This skill covers runtime identifier translation, subagent waiting, and runtime-failure reporting. CCW defines recipe bodies, workflow gates, and quality policy.

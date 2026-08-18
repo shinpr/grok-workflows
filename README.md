@@ -1,130 +1,111 @@
 # grok-workflows
 
-Grok marketplace for running [claude-code-workflows](https://github.com/shinpr/claude-code-workflows) (CCW) on Grok.
+Run [claude-code-workflows](https://github.com/shinpr/claude-code-workflows) (CCW) design, implementation, diagnosis, and review recipes on Grok without maintaining a Grok-specific fork.
 
-CCW is a workflow suite originally written for Claude Code. It can run on Grok on its own, but tool names, agent types, and progress-tracking duties still differ. This repository packages:
+This marketplace provides pinned upstream CCW workflow packs together with `claude-to-grok`, a small adapter for Grok's tool and agent names. CCW continues to own the recipes, approval gates, review loops, and quality checks.
 
-1. **`claude-to-grok`** — runtime translation skill (this repo)
-2. **`dev-workflows*`** — CCW workflow plugins (external entries that pull upstream CCW)
+## Quick start
 
-Grok users use this marketplace as the install surface. Workflow design stays upstream in CCW.
-
-Layout is Grok-native (`.grok-plugin` only).
-
-## Why this exists
-
-CCW recipes and agents refer to Claude Code concepts such as `Agent`, `TaskCreate`, `Bash`, and bare `subagent_type` names.
-
-Grok already understands many of these concepts. Remaining differences still need a stable mapping so orchestration applies the same translations every turn. That mapping is the `claude-to-grok` skill.
-
-CCW `recipe-*` skills stay user slash commands (`disable-model-invocation: true`). This repo does not rewrite CCW flows, workflow stop points (user approval gates), document gates, or quality cycles.
-
-## Plugins
-
-| Plugin | Role |
-|--------|------|
-| `claude-to-grok` | Runtime translation (required on Grok) |
-| `dev-workflows-fullstack` | Fullstack workflows + recipes (typical choice) |
-| `dev-workflows` | Backend-only workflows |
-| `dev-workflows-frontend` | Frontend-only workflows |
-
-Upstream content: [claude-code-workflows](https://github.com/shinpr/claude-code-workflows).  
-External entries resolve to CCW **`v0.22.4`** (see `.grok-plugin/marketplace.json`).
-
-## Install (Grok)
-
-You install **two plugins by name** from this marketplace: a `dev-workflows*` pack and `claude-to-grok`.
-
-### How Grok install works
-
-| Step | Command | What it does |
-|------|---------|----------------|
-| Register marketplace | `grok plugin marketplace add …` | Adds a **catalog**. No skills yet. |
-| Install plugins | `grok plugin install <name> --trust` | Downloads/activates that plugin. **Required** for each plugin you use. |
-| Enable | `grok plugin enable <name>` | Only if something is installed but disabled. Fresh install is usually already enabled. |
-
-`marketplace add` alone does nothing useful for recipes.  
-`enable` is not a substitute for `install`.
-
-After `marketplace add`, `grok plugin install` accepts the **plugin name** as listed in that catalog (verified with Grok 0.2.x). You do not pass git URLs or version strings in the install line; the marketplace entry already points at the right upstream ref.
-
-### Steps
-
-**1. Add this marketplace (from Git)**
+Install the adapter and one workflow pack. `dev-workflows-fullstack` is the usual choice when a repository contains both backend and frontend code.
 
 ```bash
 grok plugin marketplace add shinpr/grok-workflows
-```
-
-Same idea as other Grok marketplaces: the source is the git repo, not a local path.
-
-**2. Install both plugins by name**
-
-```bash
 grok plugin install claude-to-grok --trust
 grok plugin install dev-workflows-fullstack --trust
 ```
 
-Use `dev-workflows` or `dev-workflows-frontend` instead of fullstack when that matches your stack.
-
-Install **both**—the adapter is required for the intended Grok experience. Upstream CCW version comes from this marketplace’s catalog (currently `v0.22.4`); you do not put a CCW version on the install line.
-
-> If install fails because **multiple marketplaces** provide `dev-workflows-fullstack` (e.g. you already added the upstream `claude-code-workflows` marketplace on Grok), remove that source first (`grok plugin marketplace remove …` — use the source as shown in `grok plugin marketplace list`), then install again via this marketplace. That may uninstall plugins that came only from the removed source.
-
-**3. Confirm, then open a new session**
+Confirm the installation, then open a new Grok session so its slash commands refresh:
 
 ```bash
 grok plugin list
-grok inspect   # claude-to-grok skill + recipe-* + dev-workflows-fullstack:* agents
+grok inspect
 ```
 
-Start a **new** Grok session so slash commands refresh. Then:
+Start a workflow:
 
 ```text
-/recipe-implement …
+/recipe-implement "Add rate limiting to the public API"
 ```
 
-### If a plugin is installed but inactive
+`marketplace add` registers the catalog; the two `plugin install` commands install the adapter and workflow pack.
+
+## Choose a workflow pack
+
+Install `claude-to-grok` plus one of these packs:
+
+| Workflow pack | Use it for | Example entry point |
+|---------------|------------|---------------------|
+| `dev-workflows-fullstack` | Backend and React/TypeScript work in the same repository | `/recipe-fullstack-implement` |
+| `dev-workflows` | Backend, API, CLI, and general development | `/recipe-implement` |
+| `dev-workflows-frontend` | React and TypeScript frontend work | `/recipe-front-design` |
+
+The packs also include focused workflows such as `/recipe-diagnose`, `/recipe-review`, and `/recipe-reverse-engineer` where applicable.
+
+## How it works
+
+The marketplace currently pins CCW **`v0.24.7`** through external plugin entries in [`.grok-plugin/marketplace.json`](.grok-plugin/marketplace.json). Workflow source remains in the upstream CCW repository.
+
+When a recipe runs, `claude-to-grok` maps the Claude Code runtime names used by CCW to Grok equivalents. It covers:
+
+- Claude Code tool names such as `Agent`, `Bash`, `Read`, and `Edit`
+- plugin-qualified specialist names such as `dev-workflows-fullstack:task-executor`
+- subagent waiting and runtime-failure reporting
+
+The adapter does not rewrite CCW recipes or remove their user approvals, document gates, review cycles, or quality checks. `recipe-*` workflows remain user-invoked slash commands.
+
+## Installation details
+
+### Installed but inactive
+
+Fresh installs are normally enabled. If `grok plugin list` shows a plugin as disabled, enable it explicitly:
 
 ```bash
 grok plugin enable claude-to-grok
 grok plugin enable dev-workflows-fullstack
 ```
 
-Only when `list` shows the plugin as disabled—not the normal first-time path.
+Replace `dev-workflows-fullstack` with the workflow pack you installed.
 
-### UI
+### Marketplace UI
 
-After the marketplace source is added, the Marketplace tab can install the same plugins. Confirm with `grok plugin list` / `grok inspect`.
+After adding the marketplace source, you can install the same plugins from Grok's Marketplace tab. Use `grok plugin list` and `grok inspect` to confirm the result.
 
-### Developing this repo before publish
+## Troubleshooting
 
-Until `shinpr/grok-workflows` is on GitHub, point the marketplace at a clone for local verification only:
+### Multiple marketplaces provide the same workflow pack
+
+If another marketplace already provides `dev-workflows-fullstack`, Grok may reject the ambiguous plugin name. List the registered sources, remove the duplicate source, then install again from this marketplace:
 
 ```bash
-grok plugin marketplace add /path/to/grok-workflows
-# then the same install <name> --trust commands as above
+grok plugin marketplace list
+grok plugin marketplace remove <source>
 ```
 
-That path form is for maintainers/smoke tests, not the documented end-user install.
+Removing a marketplace may also uninstall plugins available only from that source.
 
-## What the adapter does
+### Subagents are missing after installation
 
-### In scope
+Run `grok inspect` and confirm that `claude-to-grok`, `recipe-*`, and the selected pack's agents are present. CCW `v0.22.3` and earlier used agent frontmatter that Grok does not load; reinstall through this marketplace to use its current pin.
 
-- Translate Claude Code Agent invocations (`Agent` / `Task` tool) to `spawn_subagent`
-- Translate common file and shell tools to Grok names
-- Canonicalize `subagent_type` to `dev-workflows-fullstack:<name>` (or the backend/frontend plugin prefix)
-- Convert progress registration duty `TaskCreate` / `TaskUpdate` → `todo_write` (session todos only; not full Task board parity)
-- Report runtime failures with a structured escalation after checking the available tools or subagent types (see the mapping skill)
+## For maintainers
 
-### Out of scope (owned by upstream CCW)
+### Local verification
 
-- Flow design, recipe bodies, and gate policy
-- Substituting built-in agents for CCW specialists
-- Thinning Large/Medium planning or quality cycles
+Point Grok at a local clone when testing unpublished changes:
 
-## Layout
+```bash
+grok plugin marketplace add /absolute/path/to/grok-workflows
+grok plugin install claude-to-grok --trust
+grok plugin install dev-workflows-fullstack --trust
+```
+
+Validate the local adapter manifest with:
+
+```bash
+grok plugin validate plugins/claude-to-grok
+```
+
+### Repository layout
 
 ```text
 grok-workflows/
@@ -139,24 +120,12 @@ grok-workflows/
   LICENSE
 ```
 
-## Maintaining compatibility
+### Updating CCW compatibility
 
-When bumping CCW for Grok users:
-
-1. Update external plugin `ref` values in `.grok-plugin/marketplace.json` (name-based install uses this pin).
-2. Diff CCW agent/tool names against `plugins/claude-to-grok/skills/claude-to-grok/SKILL.md` tables.
-3. Keep the mapping skill short — identifiers, wait behavior, and duty equivalents only.
-
-### Troubleshooting
-
-- **Subagents not recognized after install:** catalog pin must be **v0.22.4+**. CCW `v0.22.3` agent frontmatter uses a skills format Grok does not load; reinstall via this marketplace’s pin, not an older tag.
-
-## Relationship to CCW
-
-| Concern | Where |
-|---------|--------|
-| Workflow design, recipes, agents, quality gates | [claude-code-workflows](https://github.com/shinpr/claude-code-workflows) |
-| Grok marketplace + runtime name mapping | this repository |
+1. Update each external plugin `ref` and matching version in `.grok-plugin/marketplace.json`.
+2. Compare upstream CCW tool and agent names with the maps in `plugins/claude-to-grok/skills/claude-to-grok/SKILL.md`.
+3. Keep the adapter focused on runtime identifiers, subagent waiting, and runtime-failure handling.
+4. Validate the adapter and check the final diff before publishing.
 
 ## License
 

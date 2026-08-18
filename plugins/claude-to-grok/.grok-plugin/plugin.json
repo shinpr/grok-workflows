@@ -1,7 +1,7 @@
 {
   "name": "claude-to-grok",
-  "description": "Maps Claude Code tool, agent, and progress-tracking identifiers to Grok equivalents for claude-code-workflows (dev-workflows*), preserving CCW flows and stop points.",
-  "version": "0.1.0",
+  "description": "Maps Claude Code tool and agent identifiers to Grok equivalents for claude-code-workflows (dev-workflows*), preserving CCW flows and stop points.",
+  "version": "0.1.1",
   "author": {
     "name": "Shinsuke Kagawa",
     "url": "https://github.com/shinpr"
