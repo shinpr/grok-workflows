@@ -2,7 +2,7 @@
 
 Run [claude-code-workflows](https://github.com/shinpr/claude-code-workflows) (CCW) design, implementation, diagnosis, and review recipes on Grok without maintaining a Grok-specific fork.
 
-This marketplace provides pinned upstream CCW workflow packs together with `claude-to-grok`, a small adapter for Grok's tool and agent names. CCW continues to own the recipes, approval gates, review loops, and quality checks.
+This marketplace provides upstream CCW workflow packs together with `claude-to-grok`, a small adapter for Grok's tool and agent names. CCW continues to own the recipes, approval gates, review loops, and quality checks.
 
 ## Quick start
 
@@ -43,7 +43,7 @@ The packs also include focused workflows such as `/recipe-diagnose`, `/recipe-re
 
 ## How it works
 
-The marketplace currently pins CCW **`v0.24.7`** through external plugin entries in [`.grok-plugin/marketplace.json`](.grok-plugin/marketplace.json). Workflow source remains in the upstream CCW repository.
+The external plugin entries in [`.grok-plugin/marketplace.json`](.grok-plugin/marketplace.json) track the default branch of the upstream CCW repository. Workflow source and release versions remain owned by CCW.
 
 When a recipe runs, `claude-to-grok` maps the Claude Code runtime names used by CCW to Grok equivalents. It covers:
 
@@ -85,7 +85,7 @@ Removing a marketplace may also uninstall plugins available only from that sourc
 
 ### Subagents are missing after installation
 
-Run `grok inspect` and confirm that `claude-to-grok`, `recipe-*`, and the selected pack's agents are present. CCW `v0.22.3` and earlier used agent frontmatter that Grok does not load; reinstall through this marketplace to use its current pin.
+Run `grok inspect` and confirm that `claude-to-grok`, `recipe-*`, and the selected pack's agents are present. CCW `v0.22.3` and earlier used agent frontmatter that Grok does not load; reinstall through this marketplace to use the current upstream source.
 
 ## For maintainers
 
@@ -122,7 +122,7 @@ grok-workflows/
 
 ### Updating CCW compatibility
 
-1. Update each external plugin `ref` and matching version in `.grok-plugin/marketplace.json`.
+1. Review upstream CCW changes when the external workflow packs update.
 2. Compare upstream CCW tool and agent names with the maps in `plugins/claude-to-grok/skills/claude-to-grok/SKILL.md`.
 3. Keep the adapter focused on runtime identifiers, subagent waiting, and runtime-failure handling.
 4. Validate the adapter and check the final diff before publishing.
